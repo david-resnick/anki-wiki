@@ -14,18 +14,17 @@ def get_image(row, working_dir):
     image_url = f"https:{image_src}"
     filename = os.path.basename(urlparse(image_url).path)
     image_path = f"{working_dir}/{filename}"
-    if os.path.exists(image_path):
-        return image_path
-    response = requests.get(
-        image_url,
-        headers={
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0"
-        },
-        stream=True,
-    )
-    with open(image_path, "wb") as out_file:
-        shutil.copyfileobj(response.raw, out_file)
-    del response
+    if not os.path.exists(image_path):
+        response = requests.get(
+            image_url,
+            headers={
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0"
+            },
+            stream=True,
+        )
+        with open(image_path, "wb") as out_file:
+            shutil.copyfileobj(response.raw, out_file)
+        del response
     return image_path
 
 
@@ -33,14 +32,10 @@ def convert_to_deck(table):
     df = pd.DataFrame(pd.read_html(str(table))[0])
     rows = table.find("tbody").findAll("tr")[1:]
     assert len(df) == len(rows)
-    working_dir = "/Users/dresnick/src/ext/anki-wiki/a"
-    print(df)
-    # working_dir = tempfile.TemporaryDirectory(dir="/Users/dresnick/src/ext/anki-wiki")
+    working_dir = "images"
     for index, row in enumerate(rows):
         image_path = get_image(row, working_dir)
-        # print(df[index])
         df.at[index, "Image"] = image_path
-    print(df)
 
 
 def main():
@@ -58,7 +53,6 @@ def main():
     for table in soup.find_all("table", {"class": "wikitable"}):
         convert_to_deck(table)
         break
-        print("*" * 80)
 
 
 if __name__ == "__main__":
