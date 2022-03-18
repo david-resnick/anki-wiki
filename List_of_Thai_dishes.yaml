@@ -1,4 +1,8 @@
-Thai dishes:
+url: https://en.wikipedia.org/wiki/List_of_Thai_dishes
+top_level_deck_name: Thai dishes
+
+
+subdecks:
   Individual dishes:
     Rice dishes: 3
     Noodle dishes: 4
