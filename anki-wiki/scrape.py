@@ -136,7 +136,7 @@ def get_deck_id(deck_name):
     return config["decks"][deck_name]
 
 
-def main_deck_description(dataframes):
+def main_deck_description(dataframes, total_duplicates):
     num_cards = 0
     categories = []
     for df in dataframes:
@@ -146,8 +146,9 @@ def main_deck_description(dataframes):
     return (
         f"List of all {num_cards} Thai dishes from "
         f"<a href='{WIKIPEDIA_URL}'>Wikipedia List of Thai dishes</a>"
-        "<br/>Subdecks:"
+        "<br/><br/>Subdecks:"
         f"<ul>{''.join(categories)}</ul>"
+        f"<br/><br/>{total_duplicates} duplicates removed."
         f"<br/>Deck generated {TIMESTAMP}"
     )
 
@@ -159,22 +160,26 @@ def main():
     media_files = []
     dataframes = []
     thai_script_set = set()
+    total_duplicates = 0
     for table in soup.find_all("table", {"class": "wikitable"}):
         df = soup_to_panda(table)
         print(df.attrs["deck_name"])
         script_entries = df[FIELDS.THAI_SCRIPT].tolist()
+        duplicates = []
         for index, entry in enumerate(script_entries):
             before = len(thai_script_set)
             thai_script_set.add(entry)
             if before == len(thai_script_set):
-                print(f"Dropping duplicate entry for {entry}.")
-                df.drop([index])
+                print(f"Dropping duplicate entry for {entry} ({index}).")
+                duplicates.append(index)
+        if len(duplicates) > 0:
+            df = df.drop(duplicates)
+            total_duplicates += len(duplicates)
         deck, deck_media_files = panda_to_anki_deck(df)
         media_files.extend(deck_media_files)
         decks.append(deck)
         dataframes.append(df)
-    THAI_DISHES_DECK.description = main_deck_description(dataframes)
-
+    THAI_DISHES_DECK.description = main_deck_description(dataframes, total_duplicates)
     decks.append(THAI_DISHES_DECK)
     package = genanki.Package(decks, media_files)
     package.write_to_file(f"{TOP_LEVEL_DECK_NAME}.apkg")
