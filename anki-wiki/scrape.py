@@ -1,11 +1,12 @@
 import argparse
+import genanki
+import os
 import pandas as pd  # library for data analysis
 import requests  # library to handle requests
 import shutil
-from bs4 import BeautifulSoup  # library to parse HTML documents
-import yaml
-import os
 import tempfile
+import yaml
+from bs4 import BeautifulSoup  # library to parse HTML documents
 from urllib.parse import urlparse
 
 
