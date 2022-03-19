@@ -33,7 +33,7 @@ def convert_to_deck(table):
     df = pd.DataFrame(pd.read_html(str(table))[0])
     rows = table.find("tbody").findAll("tr")[1:]
     assert len(df) == len(rows)
-    working_dir = "images"
+    working_dir = "media_files/images"
     for index, row in enumerate(rows):
         image_path = get_image(row, working_dir)
         df.at[index, "Image"] = image_path
