@@ -1,23 +1,17 @@
-url: https://en.wikipedia.org/wiki/List_of_Thai_dishes
-top_level_deck_name: Thai dishes
-
-
-subdecks:
-  Individual dishes:
-    Rice dishes: 3
-    Noodle dishes: 4
-    Miscellaneous: 5
-  Shared dishes:
-    Curries: 6
-    Soups: 7
-    Salads: 8
-    Fried and stir-fried dishes: 9
-    Deep-fried dishes: 10
-    Grilled dishes: 11
-    Steamed or blanched dishes: 12
-    Stewed dishes: 13
-    Dipping sauces and pastes: 14
-    Miscellaneous: 15
-  Savoury snacks and starters: 16
-  Sweet snacks and desserts: 17
-  Drinks: 18
+decks:
+  Thai dishes::Drinks: 1807053324
+  Thai dishes::Individual dishes::Miscellaneous: 1108515588
+  Thai dishes::Individual dishes::Noodle dishes: 1452889436
+  Thai dishes::Individual dishes::Rice dishes: 1185858333
+  Thai dishes::Savoury snacks and starters: 1228017289
+  Thai dishes::Shared dishes::Curries: 2040619523
+  Thai dishes::Shared dishes::Deep-fried dishes: 1144975204
+  Thai dishes::Shared dishes::Dipping sauces and pastes: 1643053416
+  Thai dishes::Shared dishes::Fried and stir-fried dishes: 1758843348
+  Thai dishes::Shared dishes::Grilled dishes: 1675940287
+  Thai dishes::Shared dishes::Miscellaneous: 1076264924
+  Thai dishes::Shared dishes::Salads: 1095967255
+  Thai dishes::Shared dishes::Soups: 2003659341
+  Thai dishes::Shared dishes::Steamed or blanched dishes: 2108895505
+  Thai dishes::Shared dishes::Stewed dishes: 1168302750
+  Thai dishes::Sweet snacks and desserts: 1987237959

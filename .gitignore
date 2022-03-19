@@ -1,2 +1,3 @@
 .DS_Store
 media_files
+__pycache__
