@@ -1,8 +1,13 @@
 import genanki
+from datetime import datetime
+
 
 TOP_LEVEL_DECK_NAME = "Thai dishes"
 YAML_FILE_NAME = "List_of_Thai_dishes.yaml"
 WIKIPEDIA_URL = "https://en.wikipedia.org/wiki/List_of_Thai_dishes"
+TIMESTAMP = datetime.fromtimestamp(datetime.timestamp(datetime.now())).strftime(
+    "%d %B, %Y, %H:%M:%S"
+)
 
 
 class FIELDS:
@@ -20,7 +25,7 @@ class ThaiDishNote(genanki.Note):
     def guid(self):
         for field in THAI_FOOD_MODEL.fields:
             if field["name"] == FIELDS.THAI_SCRIPT:
-                return genanki.guid_for(self.fields[1])
+                return genanki.guid_for(field)
         assert False, "bug in method"
 
 
@@ -56,5 +61,4 @@ THAI_FOOD_MODEL = genanki.Model(
 THAI_DISHES_DECK = genanki.Deck(
     1955603963,
     "Thai Dishes",
-    f"List from {WIKIPEDIA_URL}",
 )

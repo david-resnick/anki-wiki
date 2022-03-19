@@ -18,6 +18,7 @@ from model import (
     WIKIPEDIA_URL,
     YAML_FILE_NAME,
     ThaiDishNote,
+    TIMESTAMP,
 )
 
 
@@ -52,6 +53,7 @@ def soup_to_panda(table):
     df = pd.DataFrame(pd.read_html(str(table))[0]).fillna("")
     rows = table.find("tbody").findAll("tr")[1:]
     assert len(df) == len(rows)
+    df.attrs["deck_name"] = build_deck_name(table)
     working_dir = "media_files/images"
     for index, row in enumerate(rows):
         image_path = get_image(row, working_dir)
@@ -60,12 +62,15 @@ def soup_to_panda(table):
     return df
 
 
-def panda_to_anki_deck(df, name):
-    description = (
-        f"Thai dishes subdeck. Filed under {name.split('::')[1:].join(' ')}"
-        f" on {WIKIPEDIA_URL}."
+def panda_to_anki_deck(df):
+    name = df.attrs["deck_name"]
+    deck = genanki.Deck(
+        get_deck_id(name),
+        name,
+        description=f"All {len(df)} Thai dishes filed under {', '.join(name.split('::')[1:])}"
+        f" on <a href='{WIKIPEDIA_URL}'>Wikipedia List of Thai dishes</a>."
+        f"<br/>Deck generated {TIMESTAMP}.",
     )
-    deck = genanki.Deck(get_deck_id(name), name, description)
     media_files = []
     for index, row in df.iterrows():
         image = (
@@ -131,17 +136,44 @@ def get_deck_id(deck_name):
     return config["decks"][deck_name]
 
 
+def main_deck_description(dataframes):
+    num_cards = 0
+    categories = []
+    for df in dataframes:
+        num_cards += len(df)
+        category_name = "→".join(df.attrs["deck_name"].split("::")[1:])
+        categories.append(f"<li>{category_name} ({len(df)})</li>")
+    return (
+        f"List of all {num_cards} Thai dishes from "
+        f"<a href='{WIKIPEDIA_URL}'>Wikipedia List of Thai dishes</a>"
+        "<br/>Subdecks:"
+        f"<ul>{''.join(categories)}</ul>"
+        f"<br/>Deck generated {TIMESTAMP}"
+    )
+
+
 def main():
     response = requests.get(WIKIPEDIA_URL)
     soup = BeautifulSoup(response.text, "html.parser")
-    decks = [THAI_DISHES_DECK]
+    decks = []
     media_files = []
+    dataframes = []
+    thai_script_set = set()
     for table in soup.find_all("table", {"class": "wikitable"}):
-        deck, deck_media_files = panda_to_anki_deck(
-            soup_to_panda(table), build_deck_name(table)
-        )
+        df = soup_to_panda(table)
+        deck, deck_media_files = panda_to_anki_deck(df)
         media_files.extend(deck_media_files)
         decks.append(deck)
+        dataframes.append(df)
+        script_entries = df[FIELDS.THAI_SCRIPT].tolist()
+        for entry in script_entries:
+            before = len(thai_script_set)
+            thai_script_set.add(entry)
+            if before == len(thai_script_set):
+                print(f"{entry} is a duplicate")
+    THAI_DISHES_DECK.description = main_deck_description(dataframes)
+
+    decks.append(THAI_DISHES_DECK)
     package = genanki.Package(decks, media_files)
     package.write_to_file(f"{TOP_LEVEL_DECK_NAME}.apkg")
 
