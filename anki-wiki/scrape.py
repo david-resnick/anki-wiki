@@ -59,6 +59,24 @@ def get_image(row, working_dir):
     return image_path
 
 
+def extract_headline(heading):
+    return heading.find("span", {"class": "mw-headline"}).text
+
+
+def build_deck_name(table):
+    element = table.previous_sibling
+    title = TOP_LEVEL_DECK_NAME
+    subtitle = None
+    while element.name != "h2":
+        if subtitle is None and element.name == "h3":
+            subtitle = extract_headline(element)
+        element = element.previous_sibling
+    title = f"{ TOP_LEVEL_DECK_NAME }::{ extract_headline(element) }"
+    if subtitle:
+        title = f"{ title }::{ subtitle }"
+    return title
+
+
 def soup_to_panda(table):
     df = pd.DataFrame(pd.read_html(str(table))[0]).fillna("")
     rows = table.find("tbody").find_all("tr")[1:]
@@ -72,6 +90,18 @@ def soup_to_panda(table):
         mp3_path = get_mp3(row[FIELDS.THAI_SCRIPT], f"{working_dir}/sounds")
         df.at[index, FIELDS.RECORDING] = mp3_path
     return df
+
+
+def get_deck_id(deck_name):
+    with open(YAML_FILE_NAME, "r") as file:
+        config = yaml.safe_load(file)
+    if "decks" not in config:
+        config["decks"] = {}
+    if deck_name not in config["decks"]:
+        config["decks"][deck_name] = random.randrange(1 << 30, 1 << 31)
+        with open(YAML_FILE_NAME, "w") as file:
+            file.write(yaml.dump(config))
+    return config["decks"][deck_name]
 
 
 def panda_to_anki_deck(df):
@@ -118,36 +148,6 @@ def panda_to_anki_deck(df):
         if len(row[FIELDS.RECORDING]):
             media_files.append(row[FIELDS.RECORDING])
     return deck, media_files
-
-
-def extract_headline(heading):
-    return heading.find("span", {"class": "mw-headline"}).text
-
-
-def build_deck_name(table):
-    element = table.previous_sibling
-    title = TOP_LEVEL_DECK_NAME
-    subtitle = None
-    while element.name != "h2":
-        if subtitle is None and element.name == "h3":
-            subtitle = extract_headline(element)
-        element = element.previous_sibling
-    title = f"{ TOP_LEVEL_DECK_NAME }::{ extract_headline(element) }"
-    if subtitle:
-        title = f"{ title }::{ subtitle }"
-    return title
-
-
-def get_deck_id(deck_name):
-    with open(YAML_FILE_NAME, "r") as file:
-        config = yaml.safe_load(file)
-    if "decks" not in config:
-        config["decks"] = {}
-    if deck_name not in config["decks"]:
-        config["decks"][deck_name] = random.randrange(1 << 30, 1 << 31)
-        with open(YAML_FILE_NAME, "w") as file:
-            file.write(yaml.dump(config))
-    return config["decks"][deck_name]
 
 
 def main_deck_description(dataframes, total_duplicates):
