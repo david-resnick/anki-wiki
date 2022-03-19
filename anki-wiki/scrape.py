@@ -51,7 +51,7 @@ def get_image(row, working_dir):
 
 def soup_to_panda(table):
     df = pd.DataFrame(pd.read_html(str(table))[0]).fillna("")
-    rows = table.find("tbody").findAll("tr")[1:]
+    rows = table.find("tbody").find_all("tr")[1:]
     assert len(df) == len(rows)
     df.attrs["deck_name"] = build_deck_name(table)
     working_dir = "media_files/images"
@@ -161,16 +161,18 @@ def main():
     thai_script_set = set()
     for table in soup.find_all("table", {"class": "wikitable"}):
         df = soup_to_panda(table)
+        print(df.attrs["deck_name"])
+        script_entries = df[FIELDS.THAI_SCRIPT].tolist()
+        for index, entry in enumerate(script_entries):
+            before = len(thai_script_set)
+            thai_script_set.add(entry)
+            if before == len(thai_script_set):
+                print(f"Dropping duplicate entry for {entry}.")
+                df.drop([index])
         deck, deck_media_files = panda_to_anki_deck(df)
         media_files.extend(deck_media_files)
         decks.append(deck)
         dataframes.append(df)
-        script_entries = df[FIELDS.THAI_SCRIPT].tolist()
-        for entry in script_entries:
-            before = len(thai_script_set)
-            thai_script_set.add(entry)
-            if before == len(thai_script_set):
-                print(f"{entry} is a duplicate")
     THAI_DISHES_DECK.description = main_deck_description(dataframes)
 
     decks.append(THAI_DISHES_DECK)
