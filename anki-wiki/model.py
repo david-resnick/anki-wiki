@@ -23,10 +23,7 @@ class FIELDS:
 class ThaiDishNote(genanki.Note):
     @property
     def guid(self):
-        for field in THAI_FOOD_MODEL.fields:
-            if field["name"] == FIELDS.THAI_SCRIPT:
-                return genanki.guid_for(field)
-        assert False, "bug in method"
+        return genanki.guid_for(self.fields[1])
 
 
 THAI_FOOD_MODEL = genanki.Model(
@@ -57,6 +54,7 @@ THAI_FOOD_MODEL = genanki.Model(
     css=".card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n\n"
     ".cloze {\n font-weight: bold;\n color: blue;\n}\n.nightMode .cloze {\n color: lightblue;\n}",
 )
+
 
 THAI_DISHES_DECK = genanki.Deck(
     1955603963,

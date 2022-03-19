@@ -10,6 +10,7 @@ import yaml
 from pprint import pprint
 from bs4 import BeautifulSoup  # library to parse HTML documents
 from urllib.parse import urlparse
+from gtts import gTTS
 from model import (
     FIELDS,
     THAI_FOOD_MODEL,
@@ -20,6 +21,15 @@ from model import (
     ThaiDishNote,
     TIMESTAMP,
 )
+
+
+def get_mp3(thai_script, working_dir):
+    mp3_path = f"{working_dir}/{thai_script.replace('/',' ')}.mp3"
+    if not os.path.exists(mp3_path):
+        tts = gTTS(thai_script, lang="th")
+        print(f"Saving {mp3_path}")
+        tts.save(mp3_path)
+    return mp3_path
 
 
 def get_image(row, working_dir):
@@ -54,11 +64,13 @@ def soup_to_panda(table):
     rows = table.find("tbody").find_all("tr")[1:]
     assert len(df) == len(rows)
     df.attrs["deck_name"] = build_deck_name(table)
-    working_dir = "media_files/images"
+    working_dir = "media_files"
     for index, row in enumerate(rows):
-        image_path = get_image(row, working_dir)
+        image_path = get_image(row, f"{working_dir}/images")
         df.at[index, FIELDS.IMAGE] = image_path
-        df.at[index, FIELDS.RECORDING] = ""
+    for index, row in df.iterrows():
+        mp3_path = get_mp3(row[FIELDS.THAI_SCRIPT], f"{working_dir}/sounds")
+        df.at[index, FIELDS.RECORDING] = mp3_path
     return df
 
 
@@ -79,7 +91,9 @@ def panda_to_anki_deck(df):
             else ""
         )
         recording = (
-            f"[sound:{row[FIELDS.RECORDING]}]" if len(row[FIELDS.RECORDING]) else ""
+            f"[sound:{os.path.basename(row[FIELDS.RECORDING])}]"
+            if len(row[FIELDS.RECORDING])
+            else ""
         )
         fields = [
             row[FIELDS.THAI_NAME],
