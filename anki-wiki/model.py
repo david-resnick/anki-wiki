@@ -15,6 +15,12 @@ class FIELDS:
     DESCRIPTION = "Description"
 
 
+class ThaiDishNote(genanki.Note):
+    @property
+    def guid(self):
+        return genanki.guid_for(self.fields[1])
+
+
 THAI_FOOD_MODEL = genanki.Model(
     2081520238,
     "Thai Food",

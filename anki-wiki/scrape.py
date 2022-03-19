@@ -17,15 +17,22 @@ from model import (
     TOP_LEVEL_DECK_NAME,
     WIKIPEDIA_URL,
     YAML_FILE_NAME,
+    ThaiDishNote,
 )
 
 
 def get_image(row, working_dir):
-    image_src = row.find("img")["src"]
-    if image_src == None:
+    image = row.find("img")
+    if image == None:
         return ""
+    image_src = image["src"]
     image_url = f"https:{image_src}"
-    filename = os.path.basename(urlparse(image_url).path)
+    original_filename = os.path.basename(urlparse(image_url).path)
+    filename = (
+        original_filename
+        if len(original_filename) < 256
+        else f"{original_filename[:251]}.jpg"
+    )
     image_path = f"{working_dir}/{filename}"
     if not os.path.exists(image_path):
         response = requests.get(
@@ -57,7 +64,11 @@ def panda_to_anki_deck(df, name):
     deck = genanki.Deck(get_deck_id(name), name)
     media_files = []
     for index, row in df.iterrows():
-        image = f"<img src='{row[FIELDS.IMAGE]}'>" if len(row[FIELDS.IMAGE]) else ""
+        image = (
+            f"<img src='{os.path.basename(row[FIELDS.IMAGE])}'>"
+            if len(row[FIELDS.IMAGE])
+            else ""
+        )
         recording = (
             f"[sound:{row[FIELDS.RECORDING]}]" if len(row[FIELDS.RECORDING]) else ""
         )
@@ -70,7 +81,15 @@ def panda_to_anki_deck(df, name):
             row[FIELDS.REGION],
             row[FIELDS.DESCRIPTION],
         ]
-        deck.add_note(genanki.Note(model=THAI_FOOD_MODEL, fields=fields))
+        tags = [row[FIELDS.REGION]] if len(row[FIELDS.REGION]) else None
+        deck.add_note(
+            ThaiDishNote(
+                model=THAI_FOOD_MODEL,
+                fields=fields,
+                sort_field=FIELDS.THAI_SCRIPT,
+                tags=tags,
+            )
+        )
         if len(row[FIELDS.IMAGE]):
             media_files.append(row[FIELDS.IMAGE])
         if len(row[FIELDS.RECORDING]):
@@ -119,10 +138,6 @@ def main():
         )
         media_files.extend(deck_media_files)
         decks.append(deck)
-        pprint(deck.to_json())
-        pprint(deck.notes)
-        pprint(deck_media_files)
-        break
     package = genanki.Package(decks, media_files)
     package.write_to_file(f"{TOP_LEVEL_DECK_NAME}.apkg")
 
