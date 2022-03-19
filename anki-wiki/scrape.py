@@ -67,7 +67,7 @@ def panda_to_anki_deck(df):
     deck = genanki.Deck(
         get_deck_id(name),
         name,
-        description=f"All {len(df)} Thai dishes filed under {', '.join(name.split('::')[1:])}"
+        description=f"All {len(df)} Thai dishes filed under \"{'→'.join(name.split('::')[1:])}\""
         f" on <a href='{WIKIPEDIA_URL}'>Wikipedia List of Thai dishes</a>."
         f"<br/>Deck generated {TIMESTAMP}.",
     )
@@ -148,7 +148,7 @@ def main_deck_description(dataframes, total_duplicates):
         f"<a href='{WIKIPEDIA_URL}'>Wikipedia List of Thai dishes</a>"
         "<br/><br/>Subdecks:"
         f"<ul>{''.join(categories)}</ul>"
-        f"<br/><br/>{total_duplicates} duplicates removed."
+        f"<br/>{total_duplicates} duplicates removed."
         f"<br/>Deck generated {TIMESTAMP}"
     )
 
