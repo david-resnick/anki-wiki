@@ -4,6 +4,17 @@ TOP_LEVEL_DECK_NAME = "Thai dishes"
 YAML_FILE_NAME = "List_of_Thai_dishes.yaml"
 WIKIPEDIA_URL = "https://en.wikipedia.org/wiki/List_of_Thai_dishes"
 
+
+class FIELDS:
+    THAI_NAME = "Thai name"
+    THAI_SCRIPT = "Thai script"
+    ENGLISH_NAME = "English name"
+    IMAGE = "Image"
+    RECORDING = "Recording"
+    REGION = "Region"
+    DESCRIPTION = "Description"
+
+
 THAI_FOOD_MODEL = genanki.Model(
     2081520238,
     "Thai Food",
@@ -33,7 +44,7 @@ THAI_FOOD_MODEL = genanki.Model(
     ".cloze {\n font-weight: bold;\n color: blue;\n}\n.nightMode .cloze {\n color: lightblue;\n}",
 )
 
-THAI_FOOD_DECK = genanki.Deck(
+THAI_DISHES_DECK = genanki.Deck(
     1955603963,
     "Thai Dishes",
     "List from https://en.wikipedia.org/wiki/List_of_Thai_dishes",

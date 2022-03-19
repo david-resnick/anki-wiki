@@ -7,13 +7,23 @@ import random
 import shutil
 import tempfile
 import yaml
+from pprint import pprint
 from bs4 import BeautifulSoup  # library to parse HTML documents
 from urllib.parse import urlparse
-from model import THAI_FOOD_MODEL, TOP_LEVEL_DECK_NAME, YAML_FILE_NAME, WIKIPEDIA_URL
+from model import (
+    FIELDS,
+    THAI_FOOD_MODEL,
+    THAI_DISHES_DECK,
+    TOP_LEVEL_DECK_NAME,
+    WIKIPEDIA_URL,
+    YAML_FILE_NAME,
+)
 
 
 def get_image(row, working_dir):
     image_src = row.find("img")["src"]
+    if image_src == None:
+        return ""
     image_url = f"https:{image_src}"
     filename = os.path.basename(urlparse(image_url).path)
     image_path = f"{working_dir}/{filename}"
@@ -32,26 +42,47 @@ def get_image(row, working_dir):
 
 
 def soup_to_panda(table):
-    df = pd.DataFrame(pd.read_html(str(table))[0])
+    df = pd.DataFrame(pd.read_html(str(table))[0]).fillna("")
     rows = table.find("tbody").findAll("tr")[1:]
     assert len(df) == len(rows)
     working_dir = "media_files/images"
     for index, row in enumerate(rows):
         image_path = get_image(row, working_dir)
-        df.at[index, "Image"] = image_path
+        df.at[index, FIELDS.IMAGE] = image_path
+        df.at[index, FIELDS.RECORDING] = ""
     return df
 
 
 def panda_to_anki_deck(df, name):
-
-    pass
+    deck = genanki.Deck(get_deck_id(name), name)
+    media_files = []
+    for index, row in df.iterrows():
+        image = f"<img src='{row[FIELDS.IMAGE]}'>" if len(row[FIELDS.IMAGE]) else ""
+        recording = (
+            f"[sound:{row[FIELDS.RECORDING]}]" if len(row[FIELDS.RECORDING]) else ""
+        )
+        fields = [
+            row[FIELDS.THAI_NAME],
+            row[FIELDS.THAI_SCRIPT],
+            row[FIELDS.ENGLISH_NAME],
+            image,
+            recording,
+            row[FIELDS.REGION],
+            row[FIELDS.DESCRIPTION],
+        ]
+        deck.add_note(genanki.Note(model=THAI_FOOD_MODEL, fields=fields))
+        if len(row[FIELDS.IMAGE]):
+            media_files.append(row[FIELDS.IMAGE])
+        if len(row[FIELDS.RECORDING]):
+            media_files.append(row[FIELDS.RECORDING])
+    return deck, media_files
 
 
 def extract_headline(heading):
     return heading.find("span", {"class": "mw-headline"}).text
 
 
-def build_deck_name(table, soup):
+def build_deck_name(table):
     element = table.previous_sibling
     title = TOP_LEVEL_DECK_NAME
     subtitle = None
@@ -80,13 +111,20 @@ def get_deck_id(deck_name):
 def main():
     response = requests.get(WIKIPEDIA_URL)
     soup = BeautifulSoup(response.text, "html.parser")
+    decks = [THAI_DISHES_DECK]
+    media_files = []
     for table in soup.find_all("table", {"class": "wikitable"}):
-        # df = soup_to_panda(table)
-        deck_name = build_deck_name(table, soup)
-        print(deck_name)
-        deck_id = get_deck_id(deck_name)
-        # panda_to_anki_deck(df, deck_name)
-        # break
+        deck, deck_media_files = panda_to_anki_deck(
+            soup_to_panda(table), build_deck_name(table)
+        )
+        media_files.extend(deck_media_files)
+        decks.append(deck)
+        pprint(deck.to_json())
+        pprint(deck.notes)
+        pprint(deck_media_files)
+        break
+    package = genanki.Package(decks, media_files)
+    package.write_to_file(f"{TOP_LEVEL_DECK_NAME}.apkg")
 
 
 if __name__ == "__main__":
