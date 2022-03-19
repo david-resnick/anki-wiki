@@ -61,7 +61,11 @@ def soup_to_panda(table):
 
 
 def panda_to_anki_deck(df, name):
-    deck = genanki.Deck(get_deck_id(name), name)
+    description = (
+        f"Thai dishes subdeck. Filed under {name.split('::')[1:].join(' ')}"
+        f" on {WIKIPEDIA_URL}."
+    )
+    deck = genanki.Deck(get_deck_id(name), name, description)
     media_files = []
     for index, row in df.iterrows():
         image = (

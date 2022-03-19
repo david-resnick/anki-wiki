@@ -18,20 +18,23 @@ class FIELDS:
 class ThaiDishNote(genanki.Note):
     @property
     def guid(self):
-        return genanki.guid_for(self.fields[1])
+        for field in THAI_FOOD_MODEL.fields:
+            if field["name"] == FIELDS.THAI_SCRIPT:
+                return genanki.guid_for(self.fields[1])
+        assert False, "bug in method"
 
 
 THAI_FOOD_MODEL = genanki.Model(
     2081520238,
     "Thai Food",
     fields=[
-        {"name": "Thai name", "font": "Arial"},
-        {"name": "Thai script", "font": "Arial"},
-        {"name": "English name", "font": "Arial"},
-        {"name": "Image", "font": "Arial"},
-        {"name": "Recording", "font": "Arial"},
-        {"name": "Region", "font": "Arial"},
-        {"name": "Description", "font": "Arial"},
+        {"name": FIELDS.THAI_NAME, "font": "Arial"},
+        {"name": FIELDS.THAI_SCRIPT, "font": "Arial"},
+        {"name": FIELDS.ENGLISH_NAME, "font": "Arial"},
+        {"name": FIELDS.IMAGE, "font": "Arial"},
+        {"name": FIELDS.RECORDING, "font": "Arial"},
+        {"name": FIELDS.REGION, "font": "Arial"},
+        {"name": FIELDS.DESCRIPTION, "font": "Arial"},
     ],
     templates=[
         {
@@ -53,5 +56,5 @@ THAI_FOOD_MODEL = genanki.Model(
 THAI_DISHES_DECK = genanki.Deck(
     1955603963,
     "Thai Dishes",
-    "List from https://en.wikipedia.org/wiki/List_of_Thai_dishes",
+    f"List from {WIKIPEDIA_URL}",
 )
