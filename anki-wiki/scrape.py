@@ -88,7 +88,7 @@ def soup_to_panda(table):
         df.at[index, FIELDS.IMAGE] = image_path
     for index, row in df.iterrows():
         mp3_path = get_mp3(row[FIELDS.THAI_SCRIPT], f"{working_dir}/sounds")
-        df.at[index, FIELDS.RECORDING] = mp3_path
+        df.at[index, FIELDS.AUDIO] = mp3_path
     return df
 
 
@@ -115,22 +115,20 @@ def panda_to_anki_deck(df):
     )
     media_files = []
     for index, row in df.iterrows():
-        image = (
-            f"<img src='{os.path.basename(row[FIELDS.IMAGE])}'>"
-            if len(row[FIELDS.IMAGE])
-            else ""
-        )
-        recording = (
-            f"[sound:{os.path.basename(row[FIELDS.RECORDING])}]"
-            if len(row[FIELDS.RECORDING])
-            else ""
-        )
         fields = [
             row[FIELDS.THAI_NAME],
             row[FIELDS.THAI_SCRIPT],
             row[FIELDS.ENGLISH_NAME],
-            image,
-            recording,
+            (
+                f"<img src='{os.path.basename(row[FIELDS.IMAGE])}'>"
+                if len(row[FIELDS.IMAGE])
+                else ""
+            ),
+            (
+                f"[sound:{os.path.basename(row[FIELDS.AUDIO])}]"
+                if len(row[FIELDS.AUDIO])
+                else ""
+            ),
             row[FIELDS.REGION],
             row[FIELDS.DESCRIPTION],
         ]
@@ -145,8 +143,8 @@ def panda_to_anki_deck(df):
         )
         if len(row[FIELDS.IMAGE]):
             media_files.append(row[FIELDS.IMAGE])
-        if len(row[FIELDS.RECORDING]):
-            media_files.append(row[FIELDS.RECORDING])
+        if len(row[FIELDS.AUDIO]):
+            media_files.append(row[FIELDS.AUDIO])
     return deck, media_files
 
 

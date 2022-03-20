@@ -15,7 +15,7 @@ class FIELDS:
     THAI_SCRIPT = "Thai script"
     ENGLISH_NAME = "English name"
     IMAGE = "Image"
-    RECORDING = "Recording"
+    AUDIO = "Audio"
     REGION = "Region"
     DESCRIPTION = "Description"
 
@@ -34,24 +34,24 @@ THAI_FOOD_MODEL = genanki.Model(
         {"name": FIELDS.THAI_SCRIPT, "font": "Arial"},
         {"name": FIELDS.ENGLISH_NAME, "font": "Arial"},
         {"name": FIELDS.IMAGE, "font": "Arial"},
-        {"name": FIELDS.RECORDING, "font": "Arial"},
+        {"name": FIELDS.AUDIO, "font": "Arial"},
         {"name": FIELDS.REGION, "font": "Arial"},
         {"name": FIELDS.DESCRIPTION, "font": "Arial"},
     ],
     templates=[
         {
             "name": "Food name",
-            "qfmt": "{{Thai script}}",
+            "qfmt": "{{Thai script}} {{Audio}}",
             "afmt": "{{FrontSide}}"
             "<hr id='answer'>"
             "{{English name}}"
             "<br/>{{Image}}"
-            "<br/>{{Thai name}} {{Recording}}"
-            "<br/>{{Description}}"
+            "<br/>{{Thai name}}"
+            "<br/><br/>{{Description}}"
             "<br/>{{Region}}",
         },
     ],
-    css=".card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n\n"
+    css=".card {\n font-family: arial;\n font-size: 40px;\n text-align: center;\n color: black;\n background-color: white;\n}\n\n"
     ".cloze {\n font-weight: bold;\n color: blue;\n}\n.nightMode .cloze {\n color: lightblue;\n}",
 )
 
