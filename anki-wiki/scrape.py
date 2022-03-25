@@ -36,8 +36,8 @@ def get_image(row, working_dir):
     image = row.find("img")
     if image == None:
         return ""
-    image_src = image["src"]
-    image_url = f"https:{image_src}"
+    image_srcset = image["srcset"]
+    image_url = f"https:{image_srcset.split(',')[-1].strip().split()[0]}"
     original_filename = os.path.basename(urlparse(image_url).path)
     filename = (
         original_filename
