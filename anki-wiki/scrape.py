@@ -36,6 +36,8 @@ def get_image(row, working_dir):
     image = row.find("img")
     if image == None:
         return ""
+    if not os.path.exists(working_dir):
+        os.makedirs(working_dir)
     image_srcset = image["srcset"]
     image_url = f"https:{image_srcset.split(',')[-1].strip().split()[0]}"
     original_filename = os.path.basename(urlparse(image_url).path)
@@ -46,16 +48,15 @@ def get_image(row, working_dir):
     )
     image_path = f"{working_dir}/{filename}"
     if not os.path.exists(image_path):
-        response = requests.get(
+        with requests.get(
             image_url,
             headers={
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0"
             },
             stream=True,
-        )
-        with open(image_path, "wb") as out_file:
-            shutil.copyfileobj(response.raw, out_file)
-        del response
+        ) as response:
+            with open(image_path, "wb") as out_file:
+                shutil.copyfileobj(response.raw, out_file)
     return image_path
 
 
