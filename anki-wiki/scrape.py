@@ -46,6 +46,9 @@ def get_image(row, working_dir):
         if len(original_filename) < 256
         else f"{original_filename[:251]}.jpg"
     )
+    if original_filename != filename:
+        print(original_filename, len(original_filename))
+        print(filename, len(filename))
     image_path = f"{working_dir}/{filename}"
     if not os.path.exists(image_path):
         with requests.get(
