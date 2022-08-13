@@ -46,9 +46,6 @@ def get_image(row, working_dir):
         if len(original_filename) < 256
         else f"{original_filename[:251]}.jpg"
     )
-    if original_filename != filename:
-        print(original_filename, len(original_filename))
-        print(filename, len(filename))
     image_path = f"{working_dir}/{filename}"
     if not os.path.exists(image_path):
         with requests.get(
@@ -110,6 +107,7 @@ def get_deck_id(deck_name):
 
 def panda_to_anki_deck(df):
     name = df.attrs["deck_name"]
+    print(f"Deck name: {name}")
     deck = genanki.Deck(
         get_deck_id(name),
         name,
@@ -179,7 +177,6 @@ def main():
     total_duplicates = 0
     for table in soup.find_all("table", {"class": "wikitable"}):
         df = soup_to_panda(table)
-        print(df.attrs["deck_name"])
         script_entries = df[FIELDS.THAI_SCRIPT].tolist()
         duplicates = []
         for index, entry in enumerate(script_entries):
@@ -199,6 +196,8 @@ def main():
     decks.append(THAI_DISHES_DECK)
     package = genanki.Package(decks, media_files)
     package.write_to_file(f"{TOP_LEVEL_DECK_NAME}.apkg")
+    all_rows = pd.concat(dataframes, ignore_index=True)
+    all_rows.to_csv(f"{TOP_LEVEL_DECK_NAME}.csv", index=False)
 
 
 if __name__ == "__main__":

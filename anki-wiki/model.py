@@ -18,6 +18,7 @@ class FIELDS:
     AUDIO = "Audio"
     REGION = "Region"
     DESCRIPTION = "Description"
+    FOOD_TYPE = "Food Type"
 
 
 class ThaiDishNote(genanki.Note):
