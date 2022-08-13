@@ -10,6 +10,11 @@ TIMESTAMP = datetime.fromtimestamp(datetime.timestamp(datetime.now())).strftime(
 )
 
 
+class DECK_ATTRIBUTES:
+    DECK_NAME = "deck name"
+    FOOD_TYPE = "food type"
+
+
 class FIELDS:
     THAI_NAME = "Thai name"
     THAI_SCRIPT = "Thai script"

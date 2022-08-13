@@ -20,6 +20,7 @@ from model import (
     YAML_FILE_NAME,
     ThaiDishNote,
     TIMESTAMP,
+    DECK_ATTRIBUTES,
 )
 
 
@@ -66,27 +67,26 @@ def extract_headline(heading):
 
 def build_deck_name(table):
     element = table.previous_sibling
-    title = TOP_LEVEL_DECK_NAME
     subtitle = None
     while element.name != "h2":
         if subtitle is None and element.name == "h3":
             subtitle = extract_headline(element)
         element = element.previous_sibling
-    title = f"{ TOP_LEVEL_DECK_NAME }::{ extract_headline(element) }"
-    if subtitle:
-        title = f"{ title }::{ subtitle }"
-    return title
+    subdeck_name = extract_headline(element) + (("::" + subtitle) if subtitle else "")
+    deck_name = f"{ TOP_LEVEL_DECK_NAME }::{ subdeck_name }"
+    return subdeck_name, deck_name
 
 
 def soup_to_panda(table):
     df = pd.DataFrame(pd.read_html(str(table))[0]).fillna("")
     rows = table.find("tbody").find_all("tr")[1:]
     assert len(df) == len(rows)
-    df.attrs["deck_name"] = build_deck_name(table)
+    food_type, df.attrs[DECK_ATTRIBUTES.DECK_NAME] = build_deck_name(table)
+    df.attrs[DECK_ATTRIBUTES.FOOD_TYPE] = food_type
     working_dir = "media_files"
     for index, row in enumerate(rows):
-        image_path = get_image(row, f"{working_dir}/images")
-        df.at[index, FIELDS.IMAGE] = image_path
+        df.at[index, FIELDS.IMAGE] = get_image(row, f"{working_dir}/images")
+        df.at[index, FIELDS.FOOD_TYPE] = food_type
     for index, row in df.iterrows():
         mp3_path = get_mp3(row[FIELDS.THAI_SCRIPT], f"{working_dir}/sounds")
         df.at[index, FIELDS.AUDIO] = mp3_path
@@ -106,8 +106,8 @@ def get_deck_id(deck_name):
 
 
 def panda_to_anki_deck(df):
-    name = df.attrs["deck_name"]
-    print(f"Deck name: {name}")
+    name = df.attrs[DECK_ATTRIBUTES.DECK_NAME]
+    print(f"Deck name: {name} ({df.attrs[DECK_ATTRIBUTES.FOOD_TYPE]})")
     deck = genanki.Deck(
         get_deck_id(name),
         name,
@@ -134,7 +134,9 @@ def panda_to_anki_deck(df):
             row[FIELDS.REGION],
             row[FIELDS.DESCRIPTION],
         ]
-        tags = [row[FIELDS.REGION]] if len(row[FIELDS.REGION]) else None
+        tags = [row[FIELDS.FOOD_TYPE].replace(" ", "_")]
+        if len(row[FIELDS.REGION]):
+            tags.append(row[FIELDS.REGION])
         deck.add_note(
             ThaiDishNote(
                 model=THAI_FOOD_MODEL,
@@ -155,7 +157,7 @@ def main_deck_description(dataframes, total_duplicates):
     categories = []
     for df in dataframes:
         num_cards += len(df)
-        category_name = "→".join(df.attrs["deck_name"].split("::")[1:])
+        category_name = "→".join(df.attrs[DECK_ATTRIBUTES.DECK_NAME].split("::")[1:])
         categories.append(f"<li>{category_name} ({len(df)})</li>")
     return (
         f"List of all {num_cards} Thai dishes from "
